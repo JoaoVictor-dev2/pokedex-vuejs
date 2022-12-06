@@ -4,18 +4,15 @@
             <img :src="baseUrlPokemonImage + pokemonNumber(pokemon) + '.png'" :alt="pokemon.name"/>
             <p>{{'N°' + pokemonNumber(pokemon, true)}}</p>
             <h1>{{pokemon.name[0].toUpperCase() + pokemon.name.substring(1)}}</h1>
-            <button @click="onClickButtonModal" :id="pokemonNumber(pokemon)">Mais Detalhes</button>
+            <button @click="isPokemon" :id="pokemonNumber(pokemon)">Mais Detalhes</button>
         </div>
     </div>
     <button @click="$store.dispatch('loadMorePokemons')" class="more-pokemon">Ver Mais</button>
-    <PokemonDetails :id ="pokemonId" v-show="isModalVisible" :dataPokemon="dataPokemonDetails" @close="closeModal"/>
-
 </template>
 
 <script>
 
 import axios from 'axios';
-import PokemonDetails from './PokemonDetails.vue';
 
     export default {
 
@@ -23,14 +20,8 @@ import PokemonDetails from './PokemonDetails.vue';
             return {
                 pokemonId: '',
                 dataPokemonDetails:'',
-                isModalVisible: false,
-                activeComponent: '',
                 baseUrlPokemonImage: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/',
             };
-        },
-
-        components: {
-            PokemonDetails
         },
 
         created() {
@@ -39,45 +30,42 @@ import PokemonDetails from './PokemonDetails.vue';
 
         methods: {
 
-            onClickButtonModal(event) {
-
-                this.pokemonId = event.path[0].getAttribute('id');
-                
-                this.getDetails(this.pokemonId);
-            },
-
             pokemonNumber(pokemon, strPad = false) {
 
                 var increment = pokemon.url.substr(-5);
 
-                var regexNumber = increment.match(/\d+/g)[0];
+                var regexNumber = increment.match(/\d+/)[0];
 
                 if (strPad) {
-                    regexNumber = increment.match(/\d+/g)[0].padStart(3, 0);
+
+                    regexNumber = regexNumber.padStart(3, 0);
                 }
 
                 return regexNumber
             },
 
-            showModal() {
-                this.isModalVisible = true;
-            },
-
-            closeModal() {
-                this.isModalVisible = false;
-            },
-
             getDetails(id) {
+
+                this.pokemonId = id;
 
                 axios.get(`https://pokeapi.co/api/v2/pokemon/${id}`).then((pokemonDetails) => {
 
                     this.dataPokemonDetails = pokemonDetails;
-                    this.showModal();
                 })
                 .catch((error) => {
                     alert(`Não foi possivel recuperar os detalhes do pokemon: ${error}`);
                 });
             },
+
+            isPokemon(event) {
+
+                this.pokemonId = event.path[0].getAttribute('id');
+
+                this.$router.push({
+                    name: 'pokemon',
+                    params: {pokemonId: this.pokemonId}
+                })
+            }
         },
     }
 
@@ -88,7 +76,6 @@ import PokemonDetails from './PokemonDetails.vue';
 .card {
     border: 1px solid #000;
     border-radius: 20px;
-    display: grid;
     flex-basis: 33%;
     padding: 15px 0;
     justify-content: center;

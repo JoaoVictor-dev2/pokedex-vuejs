@@ -20,17 +20,17 @@ export default createStore({
 
     filteredPokemons(state, search) {
 
+      var pokemonList = state.pokemonBackup.results;
+
       if (!search) {
-        state.pokemons.results = state.pokemonBackup.results
-        return
+        return state.pokemons.results = pokemonList
       }
 
-      var list = state.pokemons.results.filter(item => {
+      var list = pokemonList.filter(item => {
         return item.name.indexOf(search) > -1;
       })
 
       state.pokemons.results = list
-
     },
 
     AddPokemons (state, list) {
